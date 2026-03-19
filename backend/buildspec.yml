@@ -28,22 +28,17 @@ phases:
     commands:
       - echo Moving to backend folder
       - cd backend
-
-      - echo Building Spring Boot jar...
+      - echo Building Spring Boot jar
       - mvn clean package -DskipTests
-
-      - echo Building Docker image...
+      - echo Building Docker image
       - docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
-
-      - echo Tagging Docker image...
       - docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_URI:$IMAGE_TAG
 
   post_build:
     commands:
-      - echo Pushing Docker image to ECR...
+      - echo Pushing Docker image to ECR
       - docker push $ECR_URI:$IMAGE_TAG
-
-      - echo Updating ECS service...
+      - echo Updating ECS service
       - aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
 
 artifacts:

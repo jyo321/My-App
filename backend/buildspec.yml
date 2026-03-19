@@ -10,34 +10,37 @@ env:
 phases:
   install:
     commands:
-      - "echo Installing jq"
-      - "yum install -y jq"
+      - echo Installing jq
+      - yum install -y jq
 
   pre_build:
     commands:
-      - "echo Logging in to ECR"
-      - "ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)"
-      - "ECR_URI=$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_REPOSITORY"
-      - "IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)"
-      - "echo Image tag: $IMAGE_TAG"
-      - "aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_URI"
+      - echo Logging in to ECR
+      - ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+      - ECR_URI=$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_REPOSITORY
+      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - echo Image tag: $IMAGE_TAG
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_URI
 
   build:
     commands:
-      - "echo Moving to backend folder"
-      - "cd backend"
-      - "echo Building jar file"
-      - "mvn clean package -DskipTests"
-      - "echo Building Docker image"
-      - "docker build -t $ECR_REPOSITORY:$IMAGE_TAG ."
-      - "docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_URI:$IMAGE_TAG"
+      - echo Moving to backend folder
+      - cd backend
+      - echo Building jar file
+      - mvn clean package -DskipTests
+      - echo Building Docker image
+      - docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
+      - docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_URI:$IMAGE_TAG
+      # Tag as latest for ECS
+      - docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_URI:latest
 
   post_build:
     commands:
-      - "echo Pushing image to ECR"
-      - "docker push $ECR_URI:$IMAGE_TAG"
-      - "echo Updating ECS service"
-      - "aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment"
+      - echo Pushing image to ECR
+      - docker push $ECR_URI:$IMAGE_TAG
+      - docker push $ECR_URI:latest
+      - echo Updating ECS service
+      - aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
 
 artifacts:
   files:

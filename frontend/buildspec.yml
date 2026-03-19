@@ -2,8 +2,8 @@ version: 0.2
 
 env:
   variables:
-    S3_BUCKET: your-s3-bucket-name
-    CLOUDFRONT_DISTRIBUTION_ID: your-distribution-id
+    S3_BUCKET: test123-frontend
+    CLOUDFRONT_DISTRIBUTION_ID: EGDBNBBOV3NTU
 
 phases:
   install:

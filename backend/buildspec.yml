@@ -2,34 +2,51 @@ version: 0.2
 
 env:
   variables:
-    AWS_DEFAULT_REGION: ap-south-1
-    IMAGE_REPO_NAME: your-ecr-repo-name
-    IMAGE_TAG: latest
+    AWS_DEFAULT_REGION: us-east-1
+    ECR_REPOSITORY: test-dev-backend
+    ECS_CLUSTER: test-dev
+    ECS_SERVICE: test-dev-backend
+    TASK_DEFINITION_FAMILY: test-dev-backend
 
 phases:
   install:
     runtime-versions:
       java: corretto17
     commands:
-      - cd backend
+      - echo Installing jq...
+      - yum install -y jq
 
   pre_build:
     commands:
+      - echo Logging in to Amazon ECR...
       - ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-      - REPOSITORY_URI=$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME
-      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $REPOSITORY_URI
+      - ECR_URI=$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_REPOSITORY
+      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - echo Image tag: $IMAGE_TAG
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_URI
 
   build:
     commands:
+      - echo Building Spring Boot jar...
       - mvn clean package -DskipTests
-      - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
-      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $REPOSITORY_URI:$IMAGE_TAG
+
+      - echo Building Docker image...
+      - docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
+
+      - echo Tagging Docker image...
+      - docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_URI:$IMAGE_TAG
 
   post_build:
     commands:
-      - docker push $REPOSITORY_URI:$IMAGE_TAG
-      - printf '[{"name":"backend-container","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+      - echo Pushing Docker image to ECR...
+      - docker push $ECR_URI:$IMAGE_TAG
+
+      - echo Updating ECS service...
+      - aws ecs update-service \
+        --cluster $ECS_CLUSTER \
+        --service $ECS_SERVICE \
+        --force-new-deployment
 
 artifacts:
   files:
-    - imagedefinitions.json
+    - '**/*'

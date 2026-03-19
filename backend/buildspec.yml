@@ -30,7 +30,6 @@ phases:
       - mvn clean package -DskipTests
       - echo Building Docker image
       - docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
-      # Tag as both commit hash and latest
       - docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_URI:$IMAGE_TAG
       - docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_URI:latest
 

@@ -20,7 +20,7 @@ phases:
 
   post_build:
     commands:
+      - echo "Uploading files to S3"
       - aws s3 sync build/ s3://$S3_BUCKET --delete
-      - aws cloudfront create-invalidation \
-          --distribution-id $CLOUDFRONT_DISTRIBUTION_ID \
-          --paths "/*"
+      - echo "Invalidating CloudFront cache"
+      - aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*"

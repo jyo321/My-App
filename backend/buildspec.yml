@@ -19,7 +19,7 @@ phases:
       - ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
       - ECR_URI=$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_REPOSITORY
       - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
-      - echo Image tag: $IMAGE_TAG
+      - echo Image tag is $IMAGE_TAG
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_URI
 
   build:
@@ -35,7 +35,7 @@ phases:
 
   post_build:
     commands:
-      - echo Pushing Docker images to ECR
+      - echo Pushing Docker images
       - docker push $ECR_URI:$IMAGE_TAG
       - docker push $ECR_URI:latest
       - echo Updating ECS service

@@ -31,8 +31,7 @@ phases:
       - echo Building Docker image
       - docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
       - docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_URI:$IMAGE_TAG
-      # Tag as latest for ECS
-      - docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_URI:latest
+      - docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_URI:latest  # Must be a single line
 
   post_build:
     commands:

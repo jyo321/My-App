@@ -10,7 +10,7 @@ public class HelloController {
     @GetMapping("/api/hello")
     public HashMap<String, String> hello() {
         HashMap<String, String> map = new HashMap<>();
-        map.put("message", "Hello from Spring Boot Backend 🚀");
+        map.get("message", "Hello from Spring Boot Backend 🚀");
         return map;
     }
 }

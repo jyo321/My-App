@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import java.util.HashMap;
 
 @RestController
-@CrossOrigin(origins = "d2dk0ou1ozpcg7.cloudfront.net")
+@CrossOrigin(origins = "*") // allow frontend to call backend
 public class HelloController {
 
     @GetMapping("/api/hello")

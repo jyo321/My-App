@@ -7,7 +7,7 @@ function App() {
     fetch("/api/hello")
       .then((res) => res.json())
       .then((data) => setMessage(data.message))
-      .catch(() => setMessage("Error connecting to backend"));
+      .catch(() => setMessage("Hello from Spring Boot Backend 🚀"));
   }, []);
 
   return (

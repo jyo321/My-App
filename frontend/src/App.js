@@ -4,7 +4,7 @@ function App() {
   const [message, setMessage] = useState("Loading...");
 
   useEffect(() => {
-    fetch("http://test-dev-804738050.us-east-1.elb.amazonaws.com/api/hello")
+    fetch("/api/hello")
       .then((res) => res.json())
       .then((data) => setMessage(data.message))
       .catch(() => setMessage("Error connecting to backend"));
